@@ -132,7 +132,7 @@ int generate_audio_data( double freqs[][NUM_CHANNELS],
     }
    // printf("done with loading periods\n");
     double phases[NUM_CHANNELS];
-    for (int l = 0; l < NUM_CHANNELS; l++)
+    for (int l = 0; l < NUM_CHANNELS; l++)	
     {
         phases[l]=0.0;
     }
@@ -143,7 +143,7 @@ int generate_audio_data( double freqs[][NUM_CHANNELS],
         for(int i=0; i<length;i++){
             for(int l=0; l<NUM_CHANNELS && k < end;l++, k++){
                 //printf("%f\n", (double)(1- ((1.0/lines) * (k/rounds_per_line)) ));
-                double amp = ampls[i][l] *(double)(1- ((1.0/lines) * (k/rounds_per_line)) );
+                double amp = ampls[i][l] *(double)(1 - (double)(k-begin) /(double)(end - begin));
 
                 Slopes[i][l]  = amp / Periods[i][l];
 
@@ -393,7 +393,7 @@ int index_of_note(char *note){
 
         if((i == n_arguments || arguments[i][0] == ';')&& line_size!=0){
             //printf("stat\n");
-            double duration = strtod(arguments[i-1], NULL);
+            double duration = NUM_CHANNELS * strtod(arguments[i-1], NULL);
             double freqs[max_size_of_channel_within_line][NUM_CHANNELS];
             double ampls[max_size_of_channel_within_line][NUM_CHANNELS];
             for(int x= 0;x<max_size_of_channel_within_line;x++){
