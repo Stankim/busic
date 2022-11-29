@@ -34,7 +34,7 @@ typedef struct wavfile_header_s
 #define SUBCHUNK1SIZE   (16)
 #define AUDIO_FORMAT    (1) /*For PCM*/
 #define NUM_CHANNELS    (2)
-#define SAMPLE_RATE     (44100*4)
+#define SAMPLE_RATE     (44100*8)
 
 #define BITS_PER_SAMPLE (16)
 
@@ -98,9 +98,8 @@ int write_PCM16_stereo_header(FILE *file_p, int32_t SampleRate, int32_t FrameCou
 
 
 
-    #define DEFAULT_AMPL (1)
-    #define DEFAULT_FREQ (0.01)
-
+    #define DEFAULT_AMPL (0.0);
+    #define DEFAULT_FREQ (0.0);
 
 
 /*Generate two saw-tooth signals at two frequencies and amplitudes*/
@@ -127,6 +126,8 @@ int generate_audio_data( double freqs[][NUM_CHANNELS],
             if( freqs[i][l]*2 >= SampleRate_d){
                 return -1;
             }
+            if(freqs[i][l] == 0) Periods[i][l] = 0;
+            else
             Periods[i][l] = 1.0 / freqs[i][l];
         }
     }
@@ -137,13 +138,12 @@ int generate_audio_data( double freqs[][NUM_CHANNELS],
         phases[l]=0.0;
     }
 
-
     for(int k = begin,rounds_per_line = NUM_CHANNELS * length, lines= (end-begin)/rounds_per_line;k < end;)
     {
         for(int i=0; i<length;i++){
             for(int l=0; l<NUM_CHANNELS && k < end;l++, k++){
                 //printf("%f\n", (double)(1- ((1.0/lines) * (k/rounds_per_line)) ));
-                double amp = ampls[i][l] *(double)(1 - (double)(k-begin) /(double)(end - begin));
+                double amp = ampls[i][l] * (double)(1 - (double)(k-begin) /(double)(end - begin));
 
                 Slopes[i][l]  = amp / Periods[i][l];
 
