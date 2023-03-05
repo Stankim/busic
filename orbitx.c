@@ -2,7 +2,7 @@
 #include<math.h>
 #include<stdlib.h>
 
-int main(int args, char **argsarr){
+int main(int args, char **argsarr) {
 	if(args<1)
 	exit(0);
 	for(int i=1;i<args;i++){
