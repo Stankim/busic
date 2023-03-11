@@ -1,4 +1,4 @@
-/*Compiles with gcc -Wall -O2 -o wavwrite wavwrite.c*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,6 +40,9 @@ typedef struct wavfile_header_s
 
 #define BYTE_RATE       (SAMPLE_RATE * NUM_CHANNELS * BITS_PER_SAMPLE / 8)
 #define BLOCK_ALIGN     (NUM_CHANNELS * BITS_PER_SAMPLE / 8)
+
+
+#define MIN_PIVOT_FREQ (20)
 
 /*Return 0 on success and -1 on failure*/
 int write_PCM16_stereo_header(FILE *file_p, int32_t SampleRate, int32_t FrameCount)
@@ -170,9 +173,9 @@ int index_of_note(char *note){
     for(length=0; note[length];length++);
         if(length< 2 || length > 3)
             return -1;
-        if(note[length-1] < 48 || note[length-1]> 56)
+        if(note[length-1] < '0' || note[length-1]> '8')
             return -1;
-        int y = note[0] - 67;
+        int y = note[0] - 'C';
         if(y<-2 || y>4)
             return -1;
         if(y<0)
@@ -182,11 +185,11 @@ int index_of_note(char *note){
         else
             y=2*y-1;
         if(length==2)
-            y=12*(note[1] - 48) + y;
+            y=12*(note[1] - '0') + y;
         else{
-            if(note[1] != 35 || note[0] == 66 || note[0] == 69)
+            if(note[1] != '#' || note[0] == 'B' || note[0] == 'E')
                 return -1;
-            y=12*(note[2] - 48) + (y+1);
+            y= 12*(note[2] - '0') + (y+1);
         }
         return y;
     }
@@ -197,7 +200,7 @@ int index_of_note(char *note){
             printf("Format error: The note %s at index %d is invalid.\n",arg, counter);
             return -1;
         }
-        return 440 * pow(2, (note_index - 57)/12.0);
+        return MIN_PIVOT_FREQ * pow(2, note_index/12.0);
     }
 
     int token_onset(char *str, int i){
@@ -280,6 +283,7 @@ int index_of_note(char *note){
 
     int main(int n_argz, char **argz)
     {
+    
 
         if(n_argz==1){
             printf("Error: The input provided is not adequate.\n");
@@ -292,7 +296,7 @@ int index_of_note(char *note){
             int length = strlen(argz[1]);
             if(argz[1][length-2] == '.' && argz[1][length-1] == 'v')
             {
-                output_file = name_output_file(argz[1], length);
+                output_file = name_output_file(argz	[1], length);
                 char* buffer = getFileContents(argz[1]);
                 if (buffer){
                  n_arguments=getNumberOfTokens(buffer);
@@ -322,14 +326,14 @@ int index_of_note(char *note){
 
     double total_duration=0;
     for(int i=0,line_size=0;i<=n_arguments;i++){
-        if(i!=0)printf("statrted '%s'\n",arguments[i-1]);
+
         if((i == n_arguments  || arguments[i][0] == ';') && line_size != 0){
-            printf("duration is %s \n", arguments[i-1]);
+
             total_duration += strtod(arguments[i-1], NULL);
-            printf("total %f\n", total_duration);
+
             for(int j=i-line_size,channels=1;j<i-1;j++){
 
-                printf("j runs from %s to %s \n",arguments[j], arguments[i-2] );
+
                 if(arguments[j][0]==':'){
                     channels++;
                 }
@@ -338,14 +342,14 @@ int index_of_note(char *note){
                     exit(0);
                 }
             }
-            printf("looped\n");
+
             line_size=0;
             continue;
         }
-//        printf("done with if\n");
+
         line_size++;
     }
-    printf("total duration %f\n", total_duration);
+
 
 
     int ret;
@@ -383,16 +387,16 @@ int index_of_note(char *note){
         if(i == n_arguments || arguments[i][0] == ':' || arguments[i][0]==';'){
             if(size_of_cur_channel > max_size_of_channel_within_line)
                 max_size_of_channel_within_line = size_of_cur_channel;
-            printf("max_size_of_channel_within_line %d\n", max_size_of_channel_within_line);
+
             size_of_cur_channel=0;
         }else if(arguments[i][0] >='A' && arguments[i][0] <= 'G'){
             size_of_cur_channel++;
         }
-       // printf("size of cur channel %d\n", size_of_cur_channel);
+
 
 
         if((i == n_arguments || arguments[i][0] == ';')&& line_size!=0){
-            //printf("stat\n");
+
             double duration = NUM_CHANNELS * strtod(arguments[i-1], NULL);
             double freqs[max_size_of_channel_within_line][NUM_CHANNELS];
             double ampls[max_size_of_channel_within_line][NUM_CHANNELS];
@@ -403,9 +407,9 @@ int index_of_note(char *note){
                 }
 
             }
-            //printf("df\n");
+
             for(int j= i - line_size,channel=0, channel_freqs_counter=-1;j<i-1;j++){
-             //   printf("j is %d %s\n", j, arguments[j]);
+
                 if(arguments[j][0]==':'){
                     channel++;
                     channel_freqs_counter=-1;
@@ -421,13 +425,8 @@ int index_of_note(char *note){
 
             }
 
-            //printf("done with loop\n");
-            for(int x= 0;x<max_size_of_channel_within_line;x++){
-                for(int y=0;y<NUM_CHANNELS;y++){
-                    printf("%f  %f\n",freqs[x][y] ,ampls[x][y]);
-                }
 
-            }
+            
 
             int begin = progress;
             int framecount_to_write = round(duration* SAMPLE_RATE);
@@ -481,7 +480,6 @@ int index_of_note(char *note){
         ret = -1;
         goto error2;
     }
-//printf("done writting everything\n");
     /*Free and close everything*/
 
     error2:
