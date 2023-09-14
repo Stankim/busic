@@ -34,7 +34,7 @@ typedef struct wavfile_header_s
 #define SUBCHUNK1SIZE   (16)
 #define AUDIO_FORMAT    (1) /*For PCM*/
 #define NUM_CHANNELS    (2)
-#define SAMPLE_RATE     (44100*8)
+#define SAMPLE_RATE     (44100)
 
 #define BITS_PER_SAMPLE (16)
 
@@ -155,7 +155,7 @@ int generate_audio_data( double freqs[][NUM_CHANNELS],
                     phases[l] -= Periods[i][l];
                 }
 
-                //printf("writting %d   %f   %f\n", k, freqs[i][l], amp);
+               // printf("writting %d\t%f\t%f\t%d\n", k, freqs[i][l], amp, (int16_t)(phases[l] * Slopes[i][l]));
                 buffer_p[k]    = (int16_t)(phases[l] * Slopes[i][l]);
 
             }
@@ -372,7 +372,7 @@ int index_of_note(char *note){
     }
     
     /*Allocate the data buffer*/
-    int channel_size = 2 * NUM_CHANNELS * sizeof(int16_t);
+    int channel_size = NUM_CHANNELS * sizeof(int16_t);
     buffer_p = (int16_t *)malloc(channel_size * FrameCount);
     if(NULL == buffer_p)
     {
