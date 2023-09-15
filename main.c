@@ -155,7 +155,7 @@ int generate_audio_data( double freqs[][NUM_CHANNELS],
                     phases[l] -= Periods[i][l];
                 }
 
-               // printf("writting %d\t%f\t%f\t%d\n", k, freqs[i][l], amp, (int16_t)(phases[l] * Slopes[i][l]));
+               //printf("writting %d\t%f\t%f\t%d\n", k, freqs[i][l], amp, (int16_t)(phases[l] * Slopes[i][l]));
                 buffer_p[k]    = (int16_t)(phases[l] * Slopes[i][l]);
 
             }
@@ -356,7 +356,6 @@ int index_of_note(char *note){
     FILE* file_p;
 
     int32_t FrameCount = total_duration * SAMPLE_RATE;
-    
     int16_t  *buffer_p = NULL;
     
     size_t written;
@@ -472,9 +471,8 @@ int index_of_note(char *note){
         ret = -1;
         goto error2;
     }
-
-    written = fwrite(buffer_p, channel_size, FrameCount, file_p);
-    if(written < FrameCount)
+    written = fwrite(buffer_p, channel_size, FrameCount*NUM_CHANNELS, file_p);
+    if(written < FrameCount*NUM_CHANNELS)
     {
         perror("write_PCM16wav_data failed in main");
         ret = -1;
